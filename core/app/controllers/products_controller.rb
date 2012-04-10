@@ -13,7 +13,10 @@ class ProductsController < Spree::BaseController
 
   def show
     @product = Product.find_by_permalink!(params[:id])
-    return unless @product
+
+    unless @product.present? && !@product.deleted?
+      raise ActiveRecord::RecordNotFound
+    end
 
     @variants = Variant.active.includes([:option_values, :images]).where(:product_id => @product.id)
     @product_properties = ProductProperty.includes(:property).where(:product_id => @product.id)
